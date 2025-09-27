@@ -42,12 +42,9 @@ func main() {
 	fmt.Printf("Splitting into %d segments...\n", segmentCount)
 
 	// Process segments
-	for i := 0; i < segmentCount; i++ {
+	for i := range segmentCount {
 		start := i * 30
-		end := start + 30
-		if end > int(duration) {
-			end = int(duration)
-		}
+		end := min(start+30, int(duration))
 
 		outputFile := filepath.Join(outputDir, fmt.Sprintf("part%d.mp4", i+1))
 		fmt.Printf("Creating segment %d/%d (%.2f seconds)...\n", i+1, segmentCount, float64(end-start))
@@ -120,11 +117,11 @@ func createVideoSegment(input, output string, start, end int) error {
 
 	cmd := exec.Command(
 		"ffmpeg",
-		"-y", // Overwrite existing files
+		"-y",                            // Overwrite existing files
 		"-ss", fmt.Sprintf("%d", start), // Start time
-		"-i", input,                    // Input file
+		"-i", input, // Input file
 		"-t", fmt.Sprintf("%d", duration), // Duration
-		"-c", "copy",                   // Copy codec (no re-encoding)
+		"-c", "copy", // Copy codec (no re-encoding)
 		"-avoid_negative_ts", "make_zero",
 		"-loglevel", "error", // Only show errors
 		output,
